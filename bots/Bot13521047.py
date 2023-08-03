@@ -69,7 +69,6 @@ class Bot13521047(object):
         myPositions = [self.convert_to_coordinate(x) for x in myPositions]
         enemyPositions = [self.convert_to_coordinate(x) for x in enemyPositions]
 
-        # print("1")
         myHorizontal = self.get_horizontal(myPositions)
         myHorizontal.sort(key=len, reverse=True)
         myVertical = self.get_vertical(myPositions)
@@ -78,18 +77,13 @@ class Bot13521047(object):
         myDiagonal1.sort(key=len, reverse=True)
         myDiagonal2 = self.get_diagonal2(myPositions)
         myDiagonal2.sort(key=len, reverse=True)
-        # print("2")
-        # print(myHorizontal)
-        # print(myVertical)
-        # print(myDiagonal1)
-        # print(myDiagonal2)
+
         myLongestSide, myLongestLine = self.get_longest_line(myHorizontal, myVertical, myDiagonal1, myDiagonal2)
         myAction = self.get_next_position(myLongestSide, myLongestLine, myPositions, enemyPositions)
-        # print("Longest Side:",longestSide)
-        # print("Longest Line:",longestLine)
+
         x = random.randint(1, board.height)
         y = random.randint(1, board.width)
-        if (len(myLongestLine) == 4 and myAction != (-1, -1)):
+        if (len(myLongestLine) >= 3 and myAction != (-1, -1)):
             x = myAction[0]
             y = myAction[1]
         else:
@@ -104,6 +98,20 @@ class Bot13521047(object):
 
             enemyLongestSide, enemyLongestLine = self.get_longest_line(enemyHorizontal, enemyVertical, enemyDiagonal1, enemyDiagonal2)
             enemyAction = self.get_next_position(enemyLongestSide, enemyLongestLine, myPositions, enemyPositions)
+            while (len(enemyLongestLine) >= 3 and enemyAction == (-1, -1) and (len(enemyHorizontal) != 0 or len(enemyVertical) != 0 or len(enemyDiagonal1) != 0 or len(enemyDiagonal2) != 0)):
+                if (enemyLongestSide == "horizontal"):
+                    del enemyHorizontal[0]
+                elif (enemyLongestSide == "vertical"):
+                    del enemyVertical[0]
+                elif (enemyLongestSide == "diagonal1"):
+                    del enemyDiagonal1[0]
+                elif (enemyLongestSide == "diagonal2"):
+                    del enemyDiagonal2[0]
+                else:
+                    break
+                enemyLongestSide, enemyLongestLine = self.get_longest_line(enemyHorizontal, enemyVertical, enemyDiagonal1, enemyDiagonal2)
+                enemyAction = self.get_next_position(enemyLongestSide, enemyLongestLine, myPositions, enemyPositions)
+
             if (len(enemyLongestLine) >= 3 and enemyAction != (-1, -1)):
                 x = enemyAction[0]
                 y = enemyAction[1]
@@ -121,11 +129,9 @@ class Bot13521047(object):
                         break
                     myLongestSide, myLongestLine = self.get_longest_line(myHorizontal, myVertical, myDiagonal1, myDiagonal2)
                     myAction = self.get_next_position(myLongestSide, myLongestLine, myPositions, enemyPositions)
-
                 if (myAction != (-1, -1)):
                     x = myAction[0]
                     y = myAction[1]
-
         return f"{x},{y}"
 
     def get_positions(self, state: dict):
@@ -282,7 +288,6 @@ class Bot13521047(object):
             rightSide = (longestLine[-1][0], longestLine[-1][1]+1)
             if (self.is_input_valid(rightSide, myPositions, enemyPositions)):
                 return rightSide
-
         elif (longestSide == "vertical"):
             upSide = (longestLine[-1][0]+1, longestLine[-1][1])
             if (self.is_input_valid(upSide, myPositions, enemyPositions)):
@@ -298,7 +303,6 @@ class Bot13521047(object):
             bottomSide = (longestLine[0][0]-1, longestLine[0][1]-1)
             if (self.is_input_valid(bottomSide, myPositions, enemyPositions)):
                 return bottomSide
-
         elif (longestSide == "diagonal2"):
             upSide = (longestLine[-1][0]+1, longestLine[-1][1]-1)
             if (self.is_input_valid(upSide, myPositions, enemyPositions)):
@@ -306,7 +310,6 @@ class Bot13521047(object):
             bottomSide = (longestLine[0][0]-1, longestLine[0][1]+1)
             if (self.is_input_valid(bottomSide, myPositions, enemyPositions)):
                 return bottomSide
-
         return (-1,-1)
 
     def is_input_valid(self, position, enemyPositions, myPositions):
